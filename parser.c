@@ -22,11 +22,11 @@ The file follows the following format:
      Any command that requires arguments must have those arguments in the second line.
      The commands are as follows:
 
-         sphere: add a sphere to the edge matrix - 
+         sphere: add a sphere to the edge matrix -
                  takes 4 arguemnts (cx, cy, cz, r)
-         torus: add a torus to the edge matrix - 
+         torus: add a torus to the edge matrix -
                 takes 5 arguemnts (cx, cy, cz, r1, r2)
-         box: add a rectangular prism to the edge matrix - 
+         box: add a rectangular prism to the edge matrix -
               takes 6 arguemnts (x, y, z, width, height, depth)
          clear: clears the edge matrix
 
@@ -78,12 +78,12 @@ void parse_file ( char * filename,
   c.red = 0;
   c.green = 255;
   c.blue = 255;
-  
-  if ( strcmp(filename, "stdin") == 0 ) 
+
+  if ( strcmp(filename, "stdin") == 0 )
     f = stdin;
   else
     f = fopen(filename, "r");
-  
+
   while ( fgets(line, sizeof(line), f) != NULL ) {
     line[strlen(line)-1]='\0';
     //printf(":%s:\n",line);
@@ -106,13 +106,38 @@ void parse_file ( char * filename,
       add_circle( edges, xvals[0], yvals[0], zvals[0], r, step);
     }//end of circle
 
+    else if (strcmp(line,"box") == 0){
+      fgets(line,sizeof(line),f);
+      double x,y,z,width,height,depth;
+      sscanf(line,"%lf %lf %lf %lf %lf %lf", &x,&y,&z,&width,&height,&depth);
+      add_box(edges,x,y,z,width,height,depth);
+    }
+
+    else if (strcmp(line,"sphere") == 0){
+      fgets(line,sizeof(line),f);
+      double cx,cy,cz,r;
+      sscanf(line, "%lf %lf %lf %lf", &cx, &cy, &cz, &r);
+      add_sphere(edges,cx,cy,cz,r,step);
+    }
+
+    else if (strcmp(line, "torus") == 0){
+      fgets(line,sizeof(line),f);
+      double cx, cy, cz, r1, r2;
+      sscanf(line, "%lf %lf %lf %lf %lf", &cx, &cy, &cz, &r1, &r2);
+      add_torus(edges,cx,cy,cz,r1,r2,step);
+    }
+
+    else if (strcmp(line,"clear") == 0){
+      edges->lastcol = 0;
+    }
+
     else if ( strncmp(line, "hermite", strlen(line)) == 0 ||
               strncmp(line, "bezier", strlen(line)) == 0 ) {
       if (strncmp(line, "hermite", strlen(line)) == 0 )
         type = HERMITE;
       else
         type = BEZIER;
-      
+
       fgets(line, sizeof(line), f);
       //printf("CURVE\t%s", line);
 
@@ -124,7 +149,7 @@ void parse_file ( char * filename,
           /*       xvals[1], yvals[1], */
           /*       xvals[2], yvals[2], */
           /*       xvals[3], yvals[3]); */
-      
+
           //printf("%d\n", type);
           add_curve( edges, xvals[0], yvals[0], xvals[1], yvals[1],
                      xvals[2], yvals[2], xvals[3], yvals[3], step, type);
